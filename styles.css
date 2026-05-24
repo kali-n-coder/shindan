@@ -366,6 +366,48 @@ button:focus-visible {
   margin-top: 22px;
 }
 
+.name-card {
+  min-height: 350px;
+}
+
+.name-card label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.name-row input {
+  width: 100%;
+  min-height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  padding: 0 16px;
+  box-shadow: 0 8px 22px rgba(23, 32, 28, 0.06);
+}
+
+.name-row input:focus {
+  border-color: rgba(79, 126, 219, 0.6);
+  outline: 3px solid rgba(79, 126, 219, 0.22);
+}
+
+.form-hint {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .ghost-button:disabled {
   cursor: not-allowed;
   opacity: 0.42;
@@ -430,6 +472,21 @@ button:focus-visible {
   min-height: 1.5em;
   color: var(--green);
   font-weight: 800;
+}
+
+.save-status {
+  margin-top: 18px;
+  min-height: 1.5em;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.save-status.is-saved {
+  color: var(--green);
+}
+
+.save-status.is-error {
+  color: var(--coral);
 }
 
 .about-band {
@@ -506,8 +563,14 @@ button:focus-visible {
 
   .hero-actions,
   .result-actions,
-  .quiz-controls {
+  .quiz-controls,
+  .name-row {
     flex-direction: column;
+  }
+
+  .name-row {
+    display: flex;
+    align-items: stretch;
   }
 
   .primary-link,

@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "results": {
+      "$resultId": {
+        ".write": "newData.hasChildren(['name', 'type', 'title', 'summary', 'counts', 'answers', 'questionCount', 'createdAt'])",
+        ".validate": "newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 40 && newData.child('type').isString() && newData.child('type').val().matches(/^[EI][SN][TF][JP]$/) && newData.child('title').isString() && newData.child('summary').isString() && newData.child('questionCount').isNumber()"
+      }
+    }
+  }
+}

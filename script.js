@@ -1,3 +1,24 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getDatabase,
+  push,
+  ref,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyATr5N8pzzV4ZRdP2V4ZZgXmdEn47rFQjk",
+  authDomain: "shindan-mbti-20260524.firebaseapp.com",
+  databaseURL: "https://shindan-mbti-20260524-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "shindan-mbti-20260524",
+  storageBucket: "shindan-mbti-20260524.firebasestorage.app",
+  messagingSenderId: "716187797384",
+  appId: "1:716187797384:web:c04d3aafe806a24b255c3d",
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
 const questions = [
   {
     text: "週末の予定を決めるとき、どちらに近いですか？",
@@ -114,11 +135,17 @@ const traitLabels = {
 const state = {
   index: 0,
   answers: [],
+  participantName: "",
+  lastResult: null,
 };
 
+const nameForm = document.querySelector("#nameForm");
+const nameInput = document.querySelector("#nameInput");
+const quizHeading = document.querySelector("#quizHeading");
 const currentQuestion = document.querySelector("#currentQuestion");
 const totalQuestions = document.querySelector("#totalQuestions");
 const progressBar = document.querySelector("#progressBar");
+const questionCard = document.querySelector("#questionCard");
 const questionText = document.querySelector("#questionText");
 const choices = document.querySelector("#choices");
 const backButton = document.querySelector("#backButton");
@@ -128,20 +155,41 @@ const resultCode = document.querySelector("#resultCode");
 const resultTitle = document.querySelector("#resultTitle");
 const resultSummary = document.querySelector("#resultSummary");
 const traitGrid = document.querySelector("#traitGrid");
+const saveStatus = document.querySelector("#saveStatus");
 const restartButton = document.querySelector("#restartButton");
 const copyButton = document.querySelector("#copyButton");
 const copyStatus = document.querySelector("#copyStatus");
 
 totalQuestions.textContent = questions.length;
+backButton.disabled = true;
+
+function sanitizeName(value) {
+  return value.trim().replace(/\s+/g, " ").slice(0, 40);
+}
+
+function showNameForm() {
+  quizHeading.textContent = "まずは名前を入力してください";
+  currentQuestion.textContent = "0";
+  progressBar.style.width = "0%";
+  nameForm.hidden = false;
+  questionCard.hidden = true;
+  resultPanel.hidden = true;
+  backButton.disabled = true;
+  copyStatus.textContent = "";
+  saveStatus.textContent = "";
+}
 
 function renderQuestion() {
   const question = questions[state.index];
   const progress = (state.index / questions.length) * 100;
 
+  quizHeading.textContent = `${state.participantName}さん、直感で近い方を選んでください`;
   currentQuestion.textContent = Math.min(state.index + 1, questions.length);
   progressBar.style.width = `${progress}%`;
   questionText.textContent = question.text;
   choices.replaceChildren();
+  nameForm.hidden = true;
+  questionCard.hidden = false;
   resultPanel.hidden = true;
   copyStatus.textContent = "";
 
@@ -185,18 +233,52 @@ function calculateResult() {
   return { code, counts };
 }
 
+function buildResultPayload(code, title, summary, counts) {
+  return {
+    name: state.participantName,
+    type: code,
+    title,
+    summary,
+    counts,
+    answers: state.answers,
+    questionCount: questions.length,
+    userAgent: navigator.userAgent,
+    createdAt: serverTimestamp(),
+  };
+}
+
+async function saveResult(payload) {
+  saveStatus.className = "save-status is-saving";
+  saveStatus.textContent = "結果をFirebaseに保存しています...";
+
+  try {
+    const saved = await push(ref(database, "results"), payload);
+    state.lastResult = { ...payload, id: saved.key };
+    saveStatus.className = "save-status is-saved";
+    saveStatus.textContent = "Firebaseに保存しました。";
+  } catch (error) {
+    console.error("Failed to save result", error);
+    state.lastResult = payload;
+    saveStatus.className = "save-status is-error";
+    saveStatus.textContent = "Firebaseへの保存に失敗しました。設定を確認してください。";
+  }
+}
+
 function renderResult() {
   const { code, counts } = calculateResult();
   const [title, summary] = resultProfiles[code];
+  const namedTitle = `${state.participantName}さんの診断結果は ${code}（${title}）です`;
 
   progressBar.style.width = "100%";
   currentQuestion.textContent = questions.length;
-  questionText.textContent = "診断が完了しました";
+  quizHeading.textContent = "診断が完了しました";
+  questionText.textContent = "";
   choices.replaceChildren();
+  questionCard.hidden = true;
   backButton.disabled = false;
 
   resultCode.textContent = code;
-  resultTitle.textContent = title;
+  resultTitle.textContent = namedTitle;
   resultSummary.textContent = summary;
   traitGrid.replaceChildren();
 
@@ -223,13 +305,32 @@ function renderResult() {
 
   resultPanel.hidden = false;
   resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  saveResult(buildResultPayload(code, title, summary, counts));
 }
 
 function resetQuiz() {
   state.index = 0;
   state.answers = [];
-  renderQuestion();
+  state.participantName = "";
+  state.lastResult = null;
+  nameInput.value = "";
+  showNameForm();
 }
+
+nameForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = sanitizeName(nameInput.value);
+
+  if (!name) {
+    nameInput.focus();
+    return;
+  }
+
+  state.participantName = name;
+  state.index = 0;
+  state.answers = [];
+  renderQuestion();
+});
 
 backButton.addEventListener("click", () => {
   if (state.index === 0) return;
@@ -243,7 +344,7 @@ restartButton.addEventListener("click", resetQuiz);
 copyButton.addEventListener("click", async () => {
   const { code } = calculateResult();
   const [title, summary] = resultProfiles[code];
-  const text = `私の16タイプ風診断結果は ${code}（${title}）でした。\n${summary}`;
+  const text = `${state.participantName}さんの診断結果は ${code}（${title}）です。\n${summary}`;
 
   try {
     await navigator.clipboard.writeText(text);
@@ -253,4 +354,4 @@ copyButton.addEventListener("click", async () => {
   }
 });
 
-renderQuestion();
+showNameForm();
