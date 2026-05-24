@@ -249,18 +249,20 @@ function buildResultPayload(code, title, summary, counts) {
 
 async function saveResult(payload) {
   saveStatus.className = "save-status is-saving";
-  saveStatus.textContent = "結果をFirebaseに保存しています...";
+  saveStatus.hidden = true;
+  saveStatus.textContent = "";
 
   try {
     const saved = await push(ref(database, "results"), payload);
     state.lastResult = { ...payload, id: saved.key };
     saveStatus.className = "save-status is-saved";
-    saveStatus.textContent = "Firebaseに保存しました。";
+    saveStatus.textContent = "";
   } catch (error) {
     console.error("Failed to save result", error);
     state.lastResult = payload;
     saveStatus.className = "save-status is-error";
-    saveStatus.textContent = "Firebaseへの保存に失敗しました。設定を確認してください。";
+    saveStatus.hidden = false;
+    saveStatus.textContent = "結果の記録に失敗しました。時間をおいてもう一度お試しください。";
   }
 }
 
