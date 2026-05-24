@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="16タイプ風の性格診断をブラウザだけで試せるGitHub Pages向けミニアプリ。"
+    />
+    <title>Type Compass | 16タイプ風 性格診断</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Type Compass</p>
+          <h1 id="hero-title">3分でわかる、あなたの思考と行動のクセ</h1>
+          <p class="lead">
+            12問に答えるだけの、16タイプ風セルフチェック。公式MBTI診断ではなく、
+            新サービスのプロトタイプとして使いやすい体験に寄せています。
+          </p>
+          <div class="hero-actions">
+            <a class="primary-link" href="#quiz">診断を始める</a>
+            <a class="secondary-link" href="#about">この診断について</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="compass-card">
+            <span class="axis axis-e">E</span>
+            <span class="axis axis-n">N</span>
+            <span class="axis axis-f">F</span>
+            <span class="axis axis-j">J</span>
+            <div class="orbital-ring ring-one"></div>
+            <div class="orbital-ring ring-two"></div>
+            <div class="needle"></div>
+            <div class="core">16</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="quiz" class="quiz-band" aria-live="polite">
+        <div class="quiz-panel">
+          <div class="quiz-topline">
+            <div>
+              <p class="section-kicker">Personality Check</p>
+              <h2>直感で近い方を選んでください</h2>
+            </div>
+            <div class="progress-label">
+              <span id="currentQuestion">1</span>/<span id="totalQuestions">12</span>
+            </div>
+          </div>
+
+          <div class="progress-track" aria-hidden="true">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+
+          <article id="questionCard" class="question-card">
+            <p id="questionText" class="question-text"></p>
+            <div id="choices" class="choices"></div>
+          </article>
+
+          <div class="quiz-controls">
+            <button id="backButton" class="ghost-button" type="button">戻る</button>
+            <button id="resetButton" class="ghost-button" type="button">リセット</button>
+          </div>
+        </div>
+
+        <aside id="resultPanel" class="result-panel" hidden>
+          <p class="section-kicker">Your Result</p>
+          <div class="result-code" id="resultCode"></div>
+          <h2 id="resultTitle"></h2>
+          <p id="resultSummary" class="result-summary"></p>
+          <div class="trait-grid" id="traitGrid"></div>
+          <div class="result-actions">
+            <button id="restartButton" class="primary-button" type="button">もう一度診断する</button>
+            <button id="copyButton" class="secondary-button" type="button">結果をコピー</button>
+          </div>
+          <p id="copyStatus" class="copy-status" role="status"></p>
+        </aside>
+      </section>
+
+      <section id="about" class="about-band">
+        <div>
+          <p class="section-kicker">Prototype Notes</p>
+          <h2>サービス展開の最初のたたき台として</h2>
+        </div>
+        <div class="note-grid">
+          <article class="note-card">
+            <h3>軽い体験</h3>
+            <p>登録なし、外部APIなし、静的ファイルだけ。GitHub Pagesに置けばすぐ公開できます。</p>
+          </article>
+          <article class="note-card">
+            <h3>拡張しやすい</h3>
+            <p>質問、スコアリング、結果文はJavaScript内のデータを足すだけで育てられます。</p>
+          </article>
+          <article class="note-card">
+            <h3>表現は安全寄り</h3>
+            <p>断定しすぎず、自己理解のきっかけとして読めるトーンにしています。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
